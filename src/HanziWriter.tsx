@@ -288,7 +288,10 @@ function HanziWriterSvg({ children }: HanziWriterSvgProps) {
   );
 }
 
-function HanziWriterQuizStrokes(props: { color?: string }) {
+function HanziWriterQuizStrokes(props: {
+  color?: string;
+  radicalColor?: string;
+}) {
   const { color = '#555' } = props;
   const writer = useContext(HanziWriterContext)!;
   const quizIndex = writer.quiz.useStore((state) => state.index);
@@ -298,13 +301,16 @@ function HanziWriterQuizStrokes(props: { color?: string }) {
 
   return (
     <G transform={TRANSFORM}>
-      {correctPaths.map((stroke) => (
-        <PathFadeIn
-          key={`c.${stroke.strokeNum}`}
-          d={stroke.path}
-          fill={color}
-        />
-      ))}
+      {correctPaths.map((stroke) => {
+        const colorToUse = stroke.isInRadical ? props.radicalColor : color;
+        return (
+          <PathFadeIn
+            key={`c.${stroke.strokeNum}`}
+            d={stroke.path}
+            fill={colorToUse || color}
+          />
+        );
+      })}
     </G>
   );
 }

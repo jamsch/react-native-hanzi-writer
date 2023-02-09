@@ -90,7 +90,7 @@ export default function App() {
             {showCharacter && (
               <HanziWriter.Character color="#555" radicalColor="green" />
             )}
-            <HanziWriter.QuizStrokes />
+            <HanziWriter.QuizStrokes radicalColor="green" />
             <HanziWriter.QuizMistakeHighlighter color="#539bf5" />
           </HanziWriter.Svg>
         </HanziWriter>

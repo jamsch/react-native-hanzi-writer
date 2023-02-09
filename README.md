@@ -2,7 +2,7 @@
 
 Hanzi/Kanji writer and stroke order quizzer library for React Native, based on the vanilla JS [hanzi-writer](https://github.com/chanind/hanzi-writer) library.
 
-![preview](https://i.imgur.com/5OF22qQ.gif)
+![preview](https://i.imgur.com/5EkOdbR.gif)
 
 ## Prerequisites
 
