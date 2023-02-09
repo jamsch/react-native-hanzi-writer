@@ -126,7 +126,13 @@ export function QuizMistakeHighlighter({
 }
 
 /** Animates all strokes */
-export function CharacterAnimator({ color = '#555' }) {
+export function CharacterAnimator({
+  color = '#555',
+  radicalColor,
+}: {
+  color?: string;
+  radicalColor?: string;
+}) {
   const writer = useContext(HanziWriterContext)!;
   const animationState = writer.animator.useStore((s) => s);
 
@@ -138,9 +144,10 @@ export function CharacterAnimator({ color = '#555' }) {
     <>
       {writer.characterClass.strokes.map((stroke, idx) => {
         const isLast = idx === writer.characterClass!.strokes.length - 1;
+        const colorToUse = stroke.isInRadical ? radicalColor : color;
         return (
           <StrokeAnimator
-            strokeColor={color}
+            strokeColor={colorToUse || color}
             strokeWidth={100}
             key={`char.${stroke.strokeNum}`}
             stroke={stroke}
@@ -332,7 +339,7 @@ function HanziWriterCharacter(props: {
         </G>
       )}
       <G transform={TRANSFORM}>
-        <CharacterAnimator color={color} />
+        <CharacterAnimator color={color} radicalColor={props.radicalColor} />
       </G>
     </>
   );
