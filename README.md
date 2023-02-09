@@ -63,7 +63,7 @@ function App() {
           {/** The outline is laid under the character */}
           <HanziWriter.Outline color="#ccc" />
           {/** The character is displayed on top. Animations run here. Quizzing will hide it */}
-          <HanziWriter.Character />
+          <HanziWriter.Character color="#555" radicalColor="green" />
           {/** Quiz strokes display after every correct stroke in quiz mode */}
           <HanziWriter.QuizStrokes />
           {/** The mistake highligher will animate and fade out a stroke in quiz mode */}

@@ -87,7 +87,9 @@ export default function App() {
           {showGridLines && <HanziWriter.GridLines color="#ddd" />}
           <HanziWriter.Svg>
             {showOutline && <HanziWriter.Outline color="#ccc" />}
-            {showCharacter && <HanziWriter.Character />}
+            {showCharacter && (
+              <HanziWriter.Character color="#555" radicalColor="green" />
+            )}
             <HanziWriter.QuizStrokes />
             <HanziWriter.QuizMistakeHighlighter color="#539bf5" />
           </HanziWriter.Svg>

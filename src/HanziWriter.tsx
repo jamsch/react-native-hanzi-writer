@@ -70,7 +70,6 @@ HanziWriter.Svg = HanziWriterSvg;
 HanziWriter.GridLines = HanziWriterGridLines;
 HanziWriter.Outline = HanziWriterOutline;
 HanziWriter.Character = HanziWriterCharacter;
-HanziWriter.HanziWriterCharacter = HanziWriterCharacter;
 HanziWriter.QuizMistakeHighlighter = QuizMistakeHighlighter;
 HanziWriter.QuizStrokes = HanziWriterQuizStrokes;
 
@@ -303,7 +302,10 @@ function HanziWriterQuizStrokes(props: { color?: string }) {
   );
 }
 
-function HanziWriterCharacter(props: { color?: string }) {
+function HanziWriterCharacter(props: {
+  color?: string;
+  radicalColor?: string;
+}) {
   const writer = useContext(HanziWriterContext)!;
   const { characterClass } = writer;
   const quizActive = writer.quiz.useStore((state) => state.active);
@@ -318,11 +320,12 @@ function HanziWriterCharacter(props: { color?: string }) {
       {showCharStrokes && (
         <G transform={TRANSFORM}>
           {characterClass?.strokes.map((stroke) => {
+            const fillColor = stroke.isInRadical ? props.radicalColor : color;
             return (
               <Path
                 key={`sc.${stroke.strokeNum}`}
                 d={stroke.path}
-                fill={color}
+                fill={fillColor || color}
               />
             );
           })}
