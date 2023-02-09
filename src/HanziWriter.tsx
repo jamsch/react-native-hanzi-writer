@@ -17,7 +17,14 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import RNSvg, { Defs, ClipPath, Path, G, PathProps } from 'react-native-svg';
+import RNSvg, {
+  Defs,
+  ClipPath,
+  Path,
+  G,
+  PathProps,
+  SvgProps,
+} from 'react-native-svg';
 import LoadingIndicator from './components/LoadingIndicator';
 import simplify from './simplify';
 import { getPathString as getPathStringWorklet } from './geometry-worklet';
@@ -259,19 +266,15 @@ export function UserStrokeGesture() {
   );
 }
 
-interface HanziWriterSvgProps {
-  showCharacter?: boolean;
-  showOutline?: boolean;
-  strokeColor?: string;
-  outlineColor?: string;
+interface HanziWriterSvgProps extends SvgProps {
   children?: ReactNode;
 }
 
-function HanziWriterSvg({ children }: HanziWriterSvgProps) {
+function HanziWriterSvg({ children, ...rest }: HanziWriterSvgProps) {
   const writer = useContext(HanziWriterContext)!;
 
   return (
-    <RNSvg width="300" height="300">
+    <RNSvg width="300" height="300" {...rest}>
       <Defs>
         {writer.characterClass?.strokes.map((stroke) => (
           <ClipPath
