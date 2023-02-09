@@ -48,6 +48,7 @@
   },
   "homepage": "https://github.com/jamsch/react-native-hanzi-writer#readme",
   "publishConfig": {
+    "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
