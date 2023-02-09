@@ -1,5 +1,7 @@
 # @jamsch/react-native-hanzi-writer
 
+[![npm version](https://badge.fury.io/js/@jamsch%2Freact-native-hanzi-writer.svg)](https://www.npmjs.com/package/@jamsch/react-native-hanzi-writer) ![bundle size](https://img.shields.io/bundlephobia/min/@jamsch/react-native-hanzi-writer)
+
 Hanzi/Kanji writer and stroke order quizzer library for React Native, based on the vanilla JS [hanzi-writer](https://github.com/chanind/hanzi-writer) library.
 
 ![preview](https://i.imgur.com/5EkOdbR.gif)
