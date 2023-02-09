@@ -124,7 +124,7 @@ export const subdivideCurve = (curve: Point[], maxLen = 0.05) => {
 };
 
 /** redraw the curve using numPoints equally spaced out along the length of the curve */
-export const outlineCurve = (curve: Point[], numPoints = 30) => {
+const outlineCurve = (curve: Point[], numPoints = 30) => {
   const curveLen = length(curve);
   const segmentLen = curveLen / (numPoints - 1);
   const outlinePoints = [curve[0]];
