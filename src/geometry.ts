@@ -188,7 +188,9 @@ export const rotate = (curve: Point[], theta: number) => {
 
 // remove intermediate points that are on the same line as the points to either side
 export const _filterParallelPoints = (points: Point[]) => {
-  if (points.length < 3) return points;
+  if (points.length < 3) {
+    return points;
+  }
   const filteredPoints = [points[0], points[1]];
   points.slice(2).forEach((point) => {
     const numFilteredPoints = filteredPoints.length;
@@ -224,7 +226,9 @@ export function getPathString(points: Point[], close = false) {
 /** take points on a path and move their start point backwards by distance */
 export const extendStart = (points: Point[], dist: number) => {
   const filteredPoints = _filterParallelPoints(points);
-  if (filteredPoints.length < 2) return filteredPoints;
+  if (filteredPoints.length < 2) {
+    return filteredPoints;
+  }
   const p1 = filteredPoints[1];
   const p2 = filteredPoints[0];
   const newStart = _extendPointOnLine(p1, p2, dist);

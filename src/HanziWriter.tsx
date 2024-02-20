@@ -257,6 +257,7 @@ export function UserStrokeGesture() {
             <AnimatedPath
               animatedProps={animatedPathProps}
               stroke="black"
+              fill="none"
               strokeWidth="2"
             />
           </G>

@@ -283,7 +283,9 @@ const lengthMatches = (points: Point[], stroke: Stroke, leniency: number) => {
 };
 
 const stripDuplicates = (points: Point[]) => {
-  if (points.length < 2) return points;
+  if (points.length < 2) {
+    return points;
+  }
   const [firstPoint, ...rest] = points;
   const dedupedPoints = [firstPoint];
 
