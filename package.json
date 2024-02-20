@@ -106,6 +106,7 @@
     },
     "github": {
       "release": true,
+      "host": "github.com",
       "tokenRef": "GITHUB_JAMSCH_TOKEN"
     },
     "plugins": {
