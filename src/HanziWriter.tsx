@@ -28,7 +28,7 @@ import RNSvg, {
 import LoadingIndicator from './components/LoadingIndicator';
 import simplify from './simplify';
 import { getPathString as getPathStringWorklet } from './geometry-worklet';
-import StrokeAnimator from './components/StrokeAnimator';
+import { StrokeAnimator } from './components/StrokeAnimator';
 import Animated, {
   Easing,
   runOnJS,
@@ -121,12 +121,14 @@ export function QuizMistakeHighlighter({
   return (
     <G transform={TRANSFORM}>
       <StrokeAnimator
+        ref={(ref) => {
+          // Animate the stroke as soon as it's rendered
+          ref?.animate({ duration: strokeDuration, onComplete: ref.reset });
+        }}
         strokeColor={color}
         strokeWidth={100}
         key={`mistake.${animationPath.strokeNum}.${animationKey}`}
         stroke={animationPath}
-        resetOnComplete={true}
-        duration={strokeDuration}
       />
     </G>
   );
@@ -154,18 +156,22 @@ export function CharacterAnimator({
         const colorToUse = stroke.isInRadical ? radicalColor : color;
         return (
           <StrokeAnimator
+            ref={(ref) => {
+              // Animate the stroke as soon as it's rendered
+              ref?.animate({
+                duration: animationState.strokeDuration,
+                delay:
+                  idx * animationState.delayBetweenStrokes +
+                  animationState.strokeDuration * idx,
+                onComplete: isLast
+                  ? writer.animator.onAnimationComplete
+                  : undefined,
+              });
+            }}
             strokeColor={colorToUse || color}
             strokeWidth={100}
             key={`char.${stroke.strokeNum}`}
             stroke={stroke}
-            duration={animationState.strokeDuration}
-            delay={
-              idx * animationState.delayBetweenStrokes +
-              animationState.strokeDuration * idx
-            }
-            onComplete={
-              isLast ? writer.animator.onAnimationComplete : undefined
-            }
           />
         );
       })}
@@ -382,7 +388,9 @@ function PathFadeIn(props: PathProps) {
 
   const animatedProps = useAnimatedProps(() => {
     return {
-      fillOpacity: opacity.value,
+      // It's possible that opacity.value may be negative on Android (even on linear easing timing)
+      // which causes a brief flicker of the stroke. Clamp it to 0-1 to avoid this.
+      fillOpacity: Math.max(0, Math.min(1, opacity.value)),
     };
   });
 

@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import Animated, {
   Easing,
   runOnJS,
   useAnimatedProps,
   useSharedValue,
   withDelay,
-  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import AnimatedPath from '../components/AnimatedPath';
@@ -14,55 +13,50 @@ import type { Stroke } from '../hanzi-writer';
 
 interface StrokeAnimatorProps {
   stroke: Stroke;
-  duration: number;
-  delay?: number;
   strokeColor: string;
   strokeWidth: number;
-  resetOnComplete?: boolean;
-  onComplete?: () => void;
 }
 
-export default function StrokeAnimator({
-  stroke,
-  duration,
-  delay,
-  strokeColor,
-  strokeWidth,
-  resetOnComplete,
-  onComplete,
-}: StrokeAnimatorProps) {
+type AnimateParams = {
+  duration: number;
+  delay?: number;
+  onComplete?: () => void;
+};
+
+export type StrokeAnimatorRef = {
+  animate(params: AnimateParams): void;
+  reset(): void;
+};
+
+export const StrokeAnimator = forwardRef<
+  StrokeAnimatorRef,
+  StrokeAnimatorProps
+>(function StrokeAnimator({ stroke, strokeColor, strokeWidth }, ref) {
   const progress = useSharedValue(0);
 
-  useEffect(() => {
-    const onCompleteCallback = () => onComplete?.();
-
-    const strokeIn = withTiming(1, { duration, easing: Easing.linear }, () =>
-      runOnJS(onCompleteCallback)()
-    );
-
-    const animations: number[] = [
-      delay ? withDelay(delay, strokeIn) : strokeIn,
-    ];
-
-    if (resetOnComplete) {
-      animations.push(
-        withDelay(
-          150,
-          withTiming(0, {
-            duration: 0,
-            easing: Easing.ease,
-          })
-        )
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      progress.value = withDelay(
+        150,
+        withTiming(0, {
+          duration: 0,
+          easing: Easing.ease,
+        })
       );
-    }
-
-    if (animations.length < 2) {
-      progress.value = animations[0];
-    } else {
-      // @ts-ignore
-      progress.value = withSequence(...animations);
-    }
-  }, [resetOnComplete, onComplete, progress, delay, duration]);
+    },
+    animate: (params: {
+      duration: number;
+      delay: number;
+      onComplete?: () => void;
+    }) => {
+      const { duration, delay, onComplete } = params;
+      const onCompleteCallback = () => onComplete?.();
+      const strokeIn = withTiming(1, { duration, easing: Easing.linear }, () =>
+        runOnJS(onCompleteCallback)()
+      );
+      progress.value = delay ? withDelay(delay, strokeIn) : strokeIn;
+    },
+  }));
 
   const path = useMemo(() => {
     const extendedMaskPoints = extendStart(stroke.points, strokeWidth / 2);
@@ -80,7 +74,7 @@ export default function StrokeAnimator({
       pathLength={pathLength}
     />
   );
-}
+});
 
 interface AnimatedStrokeProps {
   d: string;
@@ -100,10 +94,12 @@ function AnimatedStroke({
   const ref = useRef(null);
 
   const animatedProps = useAnimatedProps(() => {
+    // Sometimes the progress value can be slightly out of bounds due to floating point errors
+    const clampedProgress = Math.min(Math.max(progress.value, 0), 1);
     return {
-      strokeDashoffset: pathLength * (1 - progress.value),
+      strokeDashoffset: pathLength * (1 - clampedProgress),
       // Ease out the stroke opacity
-      strokeOpacity: progress.value < 0.01 ? progress.value * 2 : 1,
+      strokeOpacity: clampedProgress < 0.01 ? clampedProgress * 2 : 1,
     };
   });
 
