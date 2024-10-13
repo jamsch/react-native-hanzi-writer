@@ -10,17 +10,17 @@ Hanzi/Kanji writer and stroke order quizzer library for React Native, based on t
 
 Make sure you have the following packages installed in your project before continuing:
 
-- react-native-gesture-handler@^2.8.0
-- react-native-reanimated@^2.12.0
-- react-native-svg@^13.4.0
+- react-native-gesture-handler@^3.0
+- react-native-reanimated@^2.0
+- react-native-svg@^15.0
 
 ## Installation
 
 ```sh
 # Peer dependencies required for this library to function
-npm install react-native-gesture-handler@^2.8.0
-npm install react-native-reanimated@^2.12.0
-npm install react-native-svg@^13.4.0
+npx expo install react-native-gesture-handler
+npx expo install react-native-reanimated
+npx expo install react-native-svg
 
 # Install this library
 npm install @jamsch/react-native-hanzi-writer
