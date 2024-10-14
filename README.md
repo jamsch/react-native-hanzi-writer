@@ -6,14 +6,6 @@ Hanzi/Kanji writer and stroke order quizzer library for React Native, based on t
 
 ![preview](https://i.imgur.com/5EkOdbR.gif)
 
-## Prerequisites
-
-Make sure you have the following packages installed in your project before continuing:
-
-- react-native-gesture-handler v2+
-- react-native-reanimated v3+
-- react-native-svg v15+
-
 ## Installation
 
 ```sh
@@ -27,6 +19,9 @@ npm install @jamsch/react-native-hanzi-writer
 ```
 
 ## Basic Usage
+
+> [!IMPORTANT]
+> Make sure your entire application is wrapped in a `<GestureHandlerRootView>` element for gestures to work in quiz mode. Also make sure that the order of the elements inside `<HanziWriter.Svg>` match the above example as it affects the display layering. That being said, you still can conditionally render these components.
 
 ```tsx
 import { Button, Text, View } from 'react-native';
@@ -79,11 +74,6 @@ function App() {
   );
 }
 ```
-
-> **Important Notes**
->
-> - Make sure your entire application is wrapped in a `<GestureHandlerRootView>` element for gestures to work in quiz mode.
-> - Make sure that the order of the elements inside `<HanziWriter.Svg>` match the above example as it affects the display layering. That being said, you still can conditionally render these components.
 
 ## Starting the quiz
 
