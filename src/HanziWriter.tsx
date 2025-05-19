@@ -45,9 +45,10 @@ import {
 } from 'react-native-gesture-handler';
 import { generateId } from './utils';
 
-export const HanziWriterContext = createContext<ReturnType<
-  typeof useHanziWriter
-> | null>(null);
+export const HanziWriterContext = createContext<{
+  writer: ReturnType<typeof useHanziWriter>;
+  userStrokeStyle?: HanziWriterProps['userStrokeStyle'];
+} | null>(null);
 
 interface HanziWriterProps {
   writer: ReturnType<typeof useHanziWriter>;
@@ -58,12 +59,19 @@ interface HanziWriterProps {
   error?: JSX.Element;
   /** Container style */
   style?: StyleProp<ViewStyle>;
+  /** User Stroke Style in Quiz */
+  userStrokeStyle?: {
+    strokeColor?: string;
+    strokeWidth?: number;
+    strokeLinecap?: 'butt' | 'round' | 'square';
+    strokeLinejoin?: 'miter' | 'round' | 'bevel';
+  };
 }
 
 export function HanziWriter(props: HanziWriterProps) {
   return (
     <View style={[styles.hanziWriterRoot, props.style]}>
-      <HanziWriterContext.Provider value={props.writer}>
+      <HanziWriterContext.Provider value={{ writer: props.writer, userStrokeStyle: props.userStrokeStyle }} >
         <CharacterLoader loading={props.loading} error={props.error}>
           {props.children}
           <UserStrokeGesture />
@@ -92,7 +100,8 @@ export function QuizMistakeHighlighter({
   color = '#555',
   strokeDuration = 400,
 }) {
-  const writer = useContext(HanziWriterContext)!;
+  const context = useContext(HanziWriterContext)!;
+  const writer = context.writer;
   const quiz = writer.quiz.useStore((s) => s);
   const animationPath = writer.characterClass?.strokes[quiz.index];
 
@@ -142,7 +151,8 @@ export function CharacterAnimator({
   color?: string;
   radicalColor?: string;
 }) {
-  const writer = useContext(HanziWriterContext)!;
+  const context = useContext(HanziWriterContext)!;
+  const writer = context.writer;
   const animationState = writer.animator.useStore((s) => s);
 
   if (animationState.state !== 'playing' || !writer.characterClass) {
@@ -193,7 +203,8 @@ export function CharacterLoader({
   error,
   children,
 }: CharacterLoaderProps) {
-  const writer = useContext(HanziWriterContext)!;
+  const context = useContext(HanziWriterContext)!;
+  const writer = context.writer;
 
   switch (writer.characterState.status) {
     case 'idle':
@@ -219,7 +230,9 @@ const positioner = new Positioner({ height: 300, width: 300, padding: 0 });
 
 /** This component handles everything to do with the user's gestures on the writer element */
 export function UserStrokeGesture() {
-  const writer = useContext(HanziWriterContext)!;
+  const context = useContext(HanziWriterContext)!;
+  const writer = context.writer;
+  const { strokeColor = 'black', strokeWidth = 2, strokeLinecap = 'round', strokeLinejoin = 'round' } = context.userStrokeStyle || {};
   const points = useSharedValue<Point[]>([]);
   const active = writer.quiz.useStore((state) => state.active);
   const fade = useSharedValue(1);
@@ -262,9 +275,11 @@ export function UserStrokeGesture() {
           <G>
             <AnimatedPath
               animatedProps={animatedPathProps}
-              stroke="black"
+              stroke={strokeColor}
               fill="none"
-              strokeWidth="2"
+              strokeWidth={strokeWidth}
+              strokeLinecap={strokeLinecap}
+              strokeLinejoin={strokeLinejoin}
             />
           </G>
         </RNSvg>
@@ -278,7 +293,8 @@ interface HanziWriterSvgProps extends SvgProps {
 }
 
 function HanziWriterSvg({ children, ...rest }: HanziWriterSvgProps) {
-  const writer = useContext(HanziWriterContext)!;
+  const context = useContext(HanziWriterContext)!;
+  const writer = context.writer;
 
   return (
     <RNSvg width="300" height="300" {...rest}>
@@ -303,7 +319,8 @@ function HanziWriterQuizStrokes(props: {
   radicalColor?: string;
 }) {
   const { color = '#555' } = props;
-  const writer = useContext(HanziWriterContext)!;
+  const context = useContext(HanziWriterContext)!;
+  const writer = context.writer;
   const quizIndex = writer.quiz.useStore((state) => state.index);
 
   const correctPaths =
@@ -329,7 +346,8 @@ function HanziWriterCharacter(props: {
   color?: string;
   radicalColor?: string;
 }) {
-  const writer = useContext(HanziWriterContext)!;
+  const context = useContext(HanziWriterContext)!;
+  const writer = context.writer;
   const { characterClass } = writer;
   const quizActive = writer.quiz.useStore((state) => state.active);
   const isAnimating = writer.animator.useStore(
@@ -362,7 +380,8 @@ function HanziWriterCharacter(props: {
 }
 
 function HanziWriterOutline(props: { color?: string }) {
-  const writer = useContext(HanziWriterContext);
+  const context = useContext(HanziWriterContext)!;
+  const writer = context.writer;
   // const isQuizActive = writer?.quiz.useStore((s) => s.active);
   // const isAnimating = writer?.animator.useStore((s) => s.state === 'playing');
 
