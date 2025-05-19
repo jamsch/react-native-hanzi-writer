@@ -81,6 +81,7 @@ You can start the quiz by calling `writer.quiz.start()`.
 
 - To listen for state changes (such as the current stroke index, or whether the quiz is active), use `writer.quiz.useStore(selector)`
 - To listen for specific quiz events (such as completed, correct stroke, mistakes), attach them as arguments to `writer.quiz.start()`.
+- To change the user stroke style you can optionally pass `userStrokeStyle={{ strokeColor: 'blue', strokeWidth: 10, strokeLinecap: 'round', strokeLinejoin: 'round' }}` to `<HanziWriter>`
 
 ```tsx
 import { HanziWriter, useHanziWriter } from '@jamsch/react-native-hanzi-writer';
