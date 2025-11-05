@@ -1,7 +1,7 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
-import Animated, {
+import {
   Easing,
-  runOnJS,
+  type SharedValue,
   useAnimatedProps,
   useSharedValue,
   withDelay,
@@ -10,6 +10,7 @@ import Animated, {
 import AnimatedPath from '../components/AnimatedPath';
 import { extendStart, getPathString } from '../geometry';
 import type { Stroke } from '../hanzi-writer';
+import { scheduleOnRN } from 'react-native-worklets';
 
 interface StrokeAnimatorProps {
   stroke: Stroke;
@@ -52,7 +53,7 @@ export const StrokeAnimator = forwardRef<
       const { duration, delay, onComplete } = params;
       const onCompleteCallback = () => onComplete?.();
       const strokeIn = withTiming(1, { duration, easing: Easing.linear }, () =>
-        runOnJS(onCompleteCallback)()
+        scheduleOnRN(onCompleteCallback)
       );
       progress.value = delay ? withDelay(delay, strokeIn) : strokeIn;
     },
@@ -78,7 +79,7 @@ export const StrokeAnimator = forwardRef<
 
 interface AnimatedStrokeProps {
   d: string;
-  progress: Animated.SharedValue<number>;
+  progress: SharedValue<number>;
   clipPath: string;
   pathLength: number;
   color: string;

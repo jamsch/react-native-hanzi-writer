@@ -7,13 +7,16 @@ import {
   TextInput,
   type StyleProp,
   type ViewStyle,
-  SafeAreaView,
 } from 'react-native';
 import {
   GestureHandlerRootView,
   ScrollView,
 } from 'react-native-gesture-handler';
-import { useHanziWriter, HanziWriter, defaultCharDataLoader } from '../../src/';
+import {
+  useHanziWriter,
+  HanziWriter,
+  defaultCharDataLoader,
+} from '@jamsch/react-native-hanzi-writer';
 
 export default function App() {
   const [character, setCharacter] = useState('验');
@@ -57,7 +60,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <ScrollView style={styles.container}>
           <View style={[styles.optionsContainer, styles.mt20]}>
             <View style={[styles.row, styles.wrap, styles.justifyCenter]}>
@@ -150,7 +153,7 @@ export default function App() {
             />
           </View>
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </GestureHandlerRootView>
   );
 }

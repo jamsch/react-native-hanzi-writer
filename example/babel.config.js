@@ -6,18 +6,6 @@ module.exports = function (api) {
 
   return {
     presets: ['babel-preset-expo'],
-    plugins: [
-      [
-        'module-resolver',
-        {
-          extensions: ['.tsx', '.ts', '.js', '.json'],
-          alias: {
-            // For development, we want to alias the library to the source
-            [pak.name]: path.join(__dirname, '..', pak.source),
-          },
-        },
-      ],
-      'react-native-reanimated/plugin',
-    ],
+    plugins: ['react-native-reanimated/plugin'],
   };
 };

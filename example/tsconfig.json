@@ -1,6 +1,10 @@
 {
-  "extends": "../tsconfig",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    // Avoid expo-cli auto-generating a tsconfig
+    "strict": true,
+    "paths": {
+      "@jamsch/react-native-hanzi-writer": ["../src/index"],
+      "@jamsch/react-native-hanzi-writer/*": ["../src/*"]
+    }
   }
 }
