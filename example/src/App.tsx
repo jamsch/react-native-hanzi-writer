@@ -13,7 +13,11 @@ import {
   GestureHandlerRootView,
   ScrollView,
 } from 'react-native-gesture-handler';
-import { useHanziWriter, HanziWriter, defaultCharDataLoader } from '../../src/';
+import {
+  useHanziWriter,
+  HanziWriter,
+  defaultCharDataLoader,
+} from '@jamsch/react-native-hanzi-writer';
 
 export default function App() {
   const [character, setCharacter] = useState('验');

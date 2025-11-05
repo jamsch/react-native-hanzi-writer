@@ -31,18 +31,14 @@ import { getPathString as getPathStringWorklet } from './geometry-worklet';
 import { StrokeAnimator } from './components/StrokeAnimator';
 import Animated, {
   Easing,
-  runOnJS,
-  useAnimatedGestureHandler,
   useAnimatedProps,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import { usePromise } from './hooks/usePromise';
 import AnimatedPath from './components/AnimatedPath';
-import {
-  PanGestureHandler,
-  PanGestureHandlerGestureEvent,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { generateId } from './utils';
 
 export const HanziWriterContext = createContext<ReturnType<
@@ -53,9 +49,9 @@ interface HanziWriterProps {
   writer: ReturnType<typeof useHanziWriter>;
   children: ReactNode;
   /** What to display while the character is loading */
-  loading?: JSX.Element;
+  loading?: React.ReactNode;
   /** What to display if there's an error */
-  error?: JSX.Element;
+  error?: React.ReactNode;
   /** Container style */
   style?: StyleProp<ViewStyle>;
 }
@@ -181,9 +177,9 @@ export function CharacterAnimator({
 
 interface CharacterLoaderProps {
   /** What to display while the character is loading */
-  loading?: JSX.Element;
+  loading?: React.ReactNode;
   /** What to display if there's an error */
-  error?: JSX.Element;
+  error?: React.ReactNode;
   /** Resolved character data */
   children: ReactNode;
 }
@@ -224,7 +220,7 @@ export function UserStrokeGesture() {
   const active = writer.quiz.useStore((state) => state.active);
   const fade = useSharedValue(1);
 
-  const check = () => {
+  const check = useCallback(() => {
     const simplifiedPoints = simplify(points.value, 1);
     writer.quiz.check(simplifiedPoints);
     // Fade out the user's stroke
@@ -233,22 +229,25 @@ export function UserStrokeGesture() {
       points.value = [];
       fade.value = 1;
     });
-  };
+  }, [writer.quiz.check]);
 
-  const onGestureEvent =
-    useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
-      onStart(event) {
-        points.value = [{ x: event.x, y: event.y }];
-      },
-      onActive(event) {
-        points.value = [...points.value, { x: event.x, y: event.y }];
-      },
-      onEnd() {
-        if (points.value.length > 0) {
-          runOnJS(check)();
-        }
-      },
-    });
+  const panGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .enabled(active)
+        .onStart((event) => {
+          points.value = [{ x: event.x, y: event.y }];
+        })
+        .onUpdate((event) => {
+          points.value = [...points.value, { x: event.x, y: event.y }];
+        })
+        .onEnd(() => {
+          if (points.value.length > 0) {
+            scheduleOnRN(check);
+          }
+        }),
+    [active, check]
+  );
 
   const animatedPathProps = useAnimatedProps(() => ({
     d: getPathStringWorklet(points.value),
@@ -256,7 +255,7 @@ export function UserStrokeGesture() {
   }));
 
   return (
-    <PanGestureHandler enabled={active} onGestureEvent={onGestureEvent}>
+    <GestureDetector gesture={panGesture}>
       <Animated.View style={StyleSheet.absoluteFill}>
         <RNSvg width="300" height="300">
           <G>
@@ -269,7 +268,7 @@ export function UserStrokeGesture() {
           </G>
         </RNSvg>
       </Animated.View>
-    </PanGestureHandler>
+    </GestureDetector>
   );
 }
 

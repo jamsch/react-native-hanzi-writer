@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
-    "paths": {
-      "react-native-hanzi-writer": ["./src/index"]
-    },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
