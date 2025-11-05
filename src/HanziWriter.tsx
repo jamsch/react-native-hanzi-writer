@@ -54,6 +54,7 @@ interface HanziWriterProps {
   error?: React.ReactNode;
   /** Container style */
   style?: StyleProp<ViewStyle>;
+  userStrokeProps?: PathProps;
 }
 
 export function HanziWriter(props: HanziWriterProps) {
@@ -62,7 +63,7 @@ export function HanziWriter(props: HanziWriterProps) {
       <HanziWriterContext.Provider value={props.writer}>
         <CharacterLoader loading={props.loading} error={props.error}>
           {props.children}
-          <UserStrokeGesture />
+          <UserStrokeGesture {...props.userStrokeProps} />
         </CharacterLoader>
       </HanziWriterContext.Provider>
     </View>
