@@ -214,7 +214,7 @@ export type HanziWriterAnimationState =
 const positioner = new Positioner({ height: 300, width: 300, padding: 0 });
 
 /** This component handles everything to do with the user's gestures on the writer element */
-export function UserStrokeGesture() {
+export function UserStrokeGesture(props: PathProps) {
   const writer = useContext(HanziWriterContext)!;
   const points = useSharedValue<Point[]>([]);
   const active = writer.quiz.useStore((state) => state.active);
@@ -264,6 +264,7 @@ export function UserStrokeGesture() {
               stroke="black"
               fill="none"
               strokeWidth="2"
+              {...props}
             />
           </G>
         </RNSvg>
