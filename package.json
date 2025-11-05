@@ -21,13 +21,11 @@
     "!android/gradlew",
     "!android/gradlew.bat",
     "!android/local.properties",
-    "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
     "!**/.*"
   ],
   "scripts": {
-    "test": "jest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{js,ts,tsx}\"",
     "prepack": "bob build",
@@ -53,11 +51,9 @@
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^10.0.1",
-    "@types/jest": "^30.0.0",
     "@types/parse-path": "^7.0.0",
     "@types/react": "~19.2.2",
     "@types/use-sync-external-store": "^1.5.0",
-    "jest": "^30.2.0",
     "metro-react-native-babel-preset": "^0.77.0",
     "react": "19.2.0",
     "react-native": "0.82.1",
