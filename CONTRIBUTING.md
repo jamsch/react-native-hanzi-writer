@@ -59,7 +59,6 @@ Remember to add tests for your change if possible. Run the unit tests by:
 yarn test
 ```
 
-
 ### Commit message convention
 
 We follow the [conventional commits specification](https://www.conventionalcommits.org/en) for our commit messages:
@@ -97,7 +96,6 @@ The `package.json` file contains various scripts for common tasks:
 
 - `yarn bootstrap`: setup project by installing all dependencies and pods.
 - `yarn typecheck`: type-check files with TypeScript.
-- `yarn lint`: lint files with ESLint.
 - `yarn test`: run unit tests with Jest.
 - `yarn example start`: start the Metro server for the example app.
 - `yarn example android`: run the example app on Android.
