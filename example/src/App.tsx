@@ -24,9 +24,14 @@ export default function App() {
   const [showOutline, setShowOutline] = useState(true);
   const [showCharacter, setShowCharacter] = useState(true);
   const [enableBackwardsStrokes, setEnableBackwardsStrokes] = useState(false);
+  const [widgetSize, setWidgetSize] = useState('400');
+
+  const sizeNumber = parseInt(widgetSize, 10) || 300;
 
   const writer = useHanziWriter({
     character,
+    size: sizeNumber,
+    padding: 10,
     // (Optional) This is where you would load the character data from your backend
     loader: (char) => {
       return defaultCharDataLoader(char);
@@ -83,11 +88,21 @@ export default function App() {
               />
             </View>
           </View>
+          <View style={[styles.optionsContainer, { alignItems: 'center' }]}>
+            <Text style={styles.heading}>WIDGET SIZE (px)</Text>
+            <TextInput
+              value={widgetSize}
+              onChangeText={setWidgetSize}
+              keyboardType="numeric"
+              style={[styles.bgGrey, styles.p4, styles.m4, styles.rounded, { width: 120, textAlign: 'center' }]}
+            />
+          </View>
           <HanziWriter
             writer={writer}
             loading={<Text>Loading...</Text>}
             error={<Text>Error loading character</Text>}
             style={styles.writerContainer}
+            
           >
             {showGridLines && <HanziWriter.GridLines color="#ddd" />}
             <HanziWriter.Svg>
