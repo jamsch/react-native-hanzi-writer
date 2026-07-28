@@ -22,6 +22,7 @@ import RNSvg, {
   ClipPath,
   Path,
   G,
+  Line,
   PathProps,
   SvgProps,
 } from 'react-native-svg';
@@ -58,8 +59,18 @@ interface HanziWriterProps {
 }
 
 export function HanziWriter(props: HanziWriterProps) {
+  const containerStyle = [
+    styles.hanziWriterRoot,
+    {
+      width: props.writer.size,
+      height: props.writer.size,
+      maxHeight: props.writer.size,
+    },
+    props.style,
+  ];
+
   return (
-    <View style={[styles.hanziWriterRoot, props.style]}>
+    <View style={containerStyle}>
       <HanziWriterContext.Provider value={props.writer}>
         <CharacterLoader loading={props.loading} error={props.error}>
           {props.children}
@@ -116,7 +127,7 @@ export function QuizMistakeHighlighter({
   }
 
   return (
-    <G transform={TRANSFORM}>
+    <G transform={getWriterTransform(writer)}>
       <StrokeAnimator
         ref={(ref) => {
           // Animate the stroke as soon as it's rendered
@@ -204,15 +215,20 @@ export function CharacterLoader({
   }
 }
 
-const TRANSFORM = 'translate(20, 248.515625) scale(0.25390625, -0.25390625)';
+// TRANSFORM is computed per-writer from the Positioner (maps internal char coords -> SVG coords)
+function getWriterTransform(writer: ReturnType<typeof useHanziWriter>) {
+  const p = writer.positioner;
+  // map: x_e = internal_x * scale + xOffset
+  //      y_e = height - yOffset - internal_y * scale
+  // which is equivalent to: translate(xOffset, height - yOffset) scale(scale, -scale)
+  return `translate(${p.xOffset}, ${p.height - p.yOffset}) scale(${p.scale}, ${-p.scale})`;
+}
 
 export type HanziWriterAnimationState =
   | 'playing'
   | 'paused'
   | 'stopped'
   | 'cancelled';
-
-const positioner = new Positioner({ height: 300, width: 300, padding: 0 });
 
 /** This component handles everything to do with the user's gestures on the writer element */
 export function UserStrokeGesture(props: PathProps) {
@@ -250,15 +266,32 @@ export function UserStrokeGesture(props: PathProps) {
     [active, check]
   );
 
+  const tapGesture = useMemo(
+    () =>
+      Gesture.Tap()
+        .enabled(active)
+        .onBegin((event) => {
+          points.value = [{ x: event.x, y: event.y }];
+        }),
+    [active]
+  );
+
   const animatedPathProps = useAnimatedProps(() => ({
     d: getPathStringWorklet(points.value),
     opacity: fade.value,
   }));
 
   return (
-    <GestureDetector gesture={panGesture}>
-      <Animated.View style={StyleSheet.absoluteFill}>
-        <RNSvg width="300" height="300">
+    <GestureDetector gesture={Gesture.Exclusive(panGesture, tapGesture)}>
+      <Animated.View
+        pointerEvents={active ? 'auto' : 'none'}
+        style={[StyleSheet.absoluteFill, styles.userStrokeLayer]}
+      >
+        <RNSvg
+          width={writer.size}
+          height={writer.size}
+          style={styles.transparentSvg}
+        >
           <G>
             <AnimatedPath
               animatedProps={animatedPathProps}
@@ -282,7 +315,7 @@ function HanziWriterSvg({ children, ...rest }: HanziWriterSvgProps) {
   const writer = useContext(HanziWriterContext)!;
 
   return (
-    <RNSvg width="300" height="300" {...rest}>
+    <RNSvg width={writer.size} height={writer.size} {...rest}>
       <Defs>
         {writer.characterClass?.strokes.map((stroke) => (
           <ClipPath
@@ -311,7 +344,7 @@ function HanziWriterQuizStrokes(props: {
     writer.characterClass?.strokes.filter((_, i) => quizIndex > i) || [];
 
   return (
-    <G transform={TRANSFORM}>
+    <G transform={getWriterTransform(writer)}>
       {correctPaths.map((stroke) => {
         const colorToUse = stroke.isInRadical ? props.radicalColor : color;
         return (
@@ -342,7 +375,7 @@ function HanziWriterCharacter(props: {
   return (
     <>
       {showCharStrokes && (
-        <G transform={TRANSFORM}>
+        <G transform={getWriterTransform(writer)}>
           {characterClass?.strokes.map((stroke) => {
             const fillColor = stroke.isInRadical ? props.radicalColor : color;
             return (
@@ -355,7 +388,7 @@ function HanziWriterCharacter(props: {
           })}
         </G>
       )}
-      <G transform={TRANSFORM}>
+      <G transform={getWriterTransform(writer)}>
         <CharacterAnimator color={color} radicalColor={props.radicalColor} />
       </G>
     </>
@@ -364,13 +397,15 @@ function HanziWriterCharacter(props: {
 
 function HanziWriterOutline(props: { color?: string }) {
   const writer = useContext(HanziWriterContext);
-  // const isQuizActive = writer?.quiz.useStore((s) => s.active);
-  // const isAnimating = writer?.animator.useStore((s) => s.state === 'playing');
 
   const color = props.color || '#ededed';
 
+  if (!writer) {
+    return null;
+  }
+
   return (
-    <G transform={TRANSFORM}>
+    <G transform={getWriterTransform(writer)}>
       {writer?.characterClass?.strokes.map((stroke) => {
         return (
           <Path key={`o.${stroke.strokeNum}`} d={stroke.path} fill={color} />
@@ -402,20 +437,27 @@ export function HanziWriterGridLines(props: {
   color?: string;
   width?: number;
 }) {
-  const { color = '#eee', width = 3 } = props;
+  const writer = useContext(HanziWriterContext)!;
+  const { color = '#DDD', width = 2 } = props;
+  const mid = writer.size / 2;
+
   return (
     <>
-      <View
-        style={[
-          styles.gridlineHorizontal,
-          { borderColor: color, borderBottomWidth: width },
-        ]}
+      <Line
+        x1={0}
+        y1={mid}
+        x2={writer.size}
+        y2={mid}
+        stroke={color}
+        strokeWidth={width}
       />
-      <View
-        style={[
-          styles.gridlineVertical,
-          { borderColor: color, borderLeftWidth: width },
-        ]}
+      <Line
+        x1={mid}
+        y1={0}
+        x2={mid}
+        y2={writer.size}
+        stroke={color}
+        strokeWidth={width}
       />
     </>
   );
@@ -427,17 +469,11 @@ const styles = StyleSheet.create({
     width: 300,
     maxHeight: 300,
   },
-  gridlineHorizontal: {
-    ...StyleSheet.absoluteFillObject,
-    bottom: '50%',
-    top: '50%',
+  userStrokeLayer: {
+    zIndex: 2,
   },
-  gridlineVertical: {
-    ...StyleSheet.absoluteFillObject,
-    bottom: 0,
-    left: '50%',
-    top: 0,
-    width: 1,
+  transparentSvg: {
+    backgroundColor: 'transparent',
   },
 });
 
@@ -576,8 +612,9 @@ const useQuiz = (params: {
   characterClass: Character | null;
   character: string;
   cancelAnimation(): void;
+  positioner: Positioner;
 }) => {
-  const { cancelAnimation, character, characterClass } = params;
+  const { cancelAnimation, character, characterClass, positioner } = params;
 
   const quizStore = useMemo(() => createQuizStore(character), [character]);
 
@@ -687,8 +724,14 @@ const useQuiz = (params: {
 export const useHanziWriter = (params: {
   character: string;
   loader?: (char: string) => Promise<CharacterJson> | CharacterJson;
+  /** Optional widget size in px (default 300) */
+  size?: number;
+  /** Optional padding for the Positioner (default 0) */
+  padding?: number;
 }) => {
   const { character } = params;
+  const size = params.size ?? 300;
+  const padding = params.padding ?? 0;
 
   const promise = useCallback(async () => {
     const loader = params.loader || defaultCharDataLoader;
@@ -710,10 +753,16 @@ export const useHanziWriter = (params: {
   const characterClass =
     characterState.status === 'resolved' ? characterState.data : null;
 
+  const positioner = useMemo(
+    () => new Positioner({ height: size, width: size, padding }),
+    [size, padding]
+  );
+
   const quiz = useQuiz({
     character,
     characterClass,
     cancelAnimation: animator.cancelAnimation,
+    positioner,
   });
 
   return {
@@ -722,5 +771,7 @@ export const useHanziWriter = (params: {
     characterState,
     characterClass,
     refetch,
+    size,
+    positioner,
   };
 };

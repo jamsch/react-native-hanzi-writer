@@ -17,6 +17,7 @@ import {
   HanziWriter,
   defaultCharDataLoader,
 } from '@jamsch/react-native-hanzi-writer';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function App() {
   const [character, setCharacter] = useState('验');
@@ -24,9 +25,14 @@ export default function App() {
   const [showOutline, setShowOutline] = useState(true);
   const [showCharacter, setShowCharacter] = useState(true);
   const [enableBackwardsStrokes, setEnableBackwardsStrokes] = useState(false);
+  const [widgetSize, setWidgetSize] = useState('400');
+
+  const sizeNumber = parseInt(widgetSize, 10) || 300;
 
   const writer = useHanziWriter({
     character,
+    size: sizeNumber,
+    padding: 10,
     // (Optional) This is where you would load the character data from your backend
     loader: (char) => {
       return defaultCharDataLoader(char);
@@ -59,102 +65,123 @@ export default function App() {
   };
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <View style={styles.container}>
-        <ScrollView style={styles.container}>
-          <View style={[styles.optionsContainer, styles.mt20]}>
-            <View style={[styles.row, styles.wrap, styles.justifyCenter]}>
-              <CheckboxButton
-                title="Gridlines"
-                onPress={() => setShowGridLines((show) => !show)}
-                checked={showGridLines}
-              />
+    <SafeAreaProvider>
+      <SafeAreaView edges={['top']} style={styles.container}>
+        <GestureHandlerRootView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.container}>
+            <View style={[styles.optionsContainer, styles.mt20]}>
+              <View style={[styles.row, styles.wrap, styles.justifyCenter]}>
+                <CheckboxButton
+                  title="Gridlines"
+                  onPress={() => setShowGridLines((show) => !show)}
+                  checked={showGridLines}
+                />
 
-              <CheckboxButton
-                title="Character"
-                onPress={() => setShowCharacter((show) => !show)}
-                checked={showCharacter}
-              />
+                <CheckboxButton
+                  title="Character"
+                  onPress={() => setShowCharacter((show) => !show)}
+                  checked={showCharacter}
+                />
 
-              <CheckboxButton
-                title="Outline"
-                onPress={() => setShowOutline((show) => !show)}
-                checked={showOutline}
+                <CheckboxButton
+                  title="Outline"
+                  onPress={() => setShowOutline((show) => !show)}
+                  checked={showOutline}
+                />
+              </View>
+            </View>
+            <View style={[styles.optionsContainer, { alignItems: 'center' }]}>
+              <Text style={styles.heading}>WIDGET SIZE (px)</Text>
+              <TextInput
+                value={widgetSize}
+                onChangeText={setWidgetSize}
+                keyboardType="numeric"
+                style={[
+                  styles.bgGrey,
+                  styles.p4,
+                  styles.m4,
+                  styles.rounded,
+                  { width: 120, textAlign: 'center' },
+                ]}
               />
             </View>
-          </View>
-          <HanziWriter
-            writer={writer}
-            loading={<Text>Loading...</Text>}
-            error={<Text>Error loading character</Text>}
-            style={styles.writerContainer}
-          >
-            {showGridLines && <HanziWriter.GridLines color="#ddd" />}
-            <HanziWriter.Svg>
-              {showOutline && <HanziWriter.Outline color="#ccc" />}
-              {showCharacter && (
-                <HanziWriter.Character color="#555" radicalColor="green" />
-              )}
-              <HanziWriter.QuizStrokes radicalColor="green" />
-              <HanziWriter.QuizMistakeHighlighter color="#539bf5" />
-            </HanziWriter.Svg>
-          </HanziWriter>
+            <HanziWriter
+              writer={writer}
+              loading={<Text>Loading...</Text>}
+              error={<Text>Error loading character</Text>}
+              style={styles.writerContainer}
+            >
+              <HanziWriter.Svg>
+                {showGridLines && <HanziWriter.GridLines color="#ddd" />}
+                {showOutline && <HanziWriter.Outline color="#ccc" />}
+                {showCharacter && (
+                  <HanziWriter.Character color="#555" radicalColor="green" />
+                )}
+                <HanziWriter.QuizStrokes radicalColor="green" />
+                <HanziWriter.QuizMistakeHighlighter color="#539bf5" />
+              </HanziWriter.Svg>
+            </HanziWriter>
 
-          <View style={styles.optionsContainer}>
-            <View style={styles.row}>
-              <View>
-                <Text style={styles.heading}>QUIZ</Text>
-                <View style={styles.itemsStart}>
-                  <CheckboxButton
-                    title="Backwards strokes"
-                    disabled={quizActive}
-                    onPress={() => setEnableBackwardsStrokes((state) => !state)}
-                    checked={enableBackwardsStrokes}
-                  />
-                  <Button
-                    disabled={animatorState === 'playing'}
-                    onPress={quizActive ? writer.quiz.stop : startQuiz}
-                    title={quizActive ? 'Stop Quiz' : 'Start Quiz'}
-                  />
-                </View>
-              </View>
-              <View style={styles.mlAuto}>
-                <Text style={[styles.heading, styles.textRight]}>ANIMATE</Text>
-                <View style={styles.row}>
-                  <Button
-                    disabled={quizActive}
-                    onPress={() => {
-                      if (animatorState === 'playing') {
-                        writer.animator.cancelAnimation();
-                      } else {
-                        writer.animator.animateCharacter({
-                          delayBetweenStrokes: 800,
-                          strokeDuration: 500,
-                          onComplete() {
-                            console.log('Animation complete!');
-                          },
-                        });
+            <View style={styles.optionsContainer}>
+              <View style={styles.row}>
+                <View>
+                  <Text style={styles.heading}>QUIZ</Text>
+                  <View style={styles.itemsStart}>
+                    <CheckboxButton
+                      title="Backwards strokes"
+                      disabled={quizActive}
+                      onPress={() =>
+                        setEnableBackwardsStrokes((state) => !state)
                       }
-                    }}
-                    title={
-                      animatorState === 'playing'
-                        ? 'Stop animating'
-                        : 'Animate Strokes'
-                    }
-                  />
+                      checked={enableBackwardsStrokes}
+                    />
+                    <Button
+                      disabled={animatorState === 'playing'}
+                      onPress={quizActive ? writer.quiz.stop : startQuiz}
+                      title={quizActive ? 'Stop Quiz' : 'Start Quiz'}
+                    />
+                  </View>
+                </View>
+                <View style={styles.mlAuto}>
+                  <Text style={[styles.heading, styles.textRight]}>
+                    ANIMATE
+                  </Text>
+                  <View style={styles.row}>
+                    <Button
+                      disabled={quizActive}
+                      onPress={() => {
+                        if (animatorState === 'playing') {
+                          writer.animator.cancelAnimation();
+                        } else {
+                          writer.animator.animateCharacter({
+                            delayBetweenStrokes: 800,
+                            strokeDuration: 500,
+                            onComplete() {
+                              console.log('Animation complete!');
+                            },
+                          });
+                        }
+                      }}
+                      title={
+                        animatorState === 'playing'
+                          ? 'Stop animating'
+                          : 'Animate Strokes'
+                      }
+                    />
+                  </View>
                 </View>
               </View>
+              <Text style={styles.heading}>LOAD CHARACTER</Text>
+              <TextInput
+                value={character}
+                onChangeText={setCharacter}
+                style={[styles.bgGrey, styles.p4, styles.m4, styles.rounded]}
+              />
             </View>
-            <Text style={styles.heading}>LOAD CHARACTER</Text>
-            <TextInput
-              value={character}
-              onChangeText={setCharacter}
-              style={[styles.bgGrey, styles.p4, styles.m4, styles.rounded]}
-            />
-          </View>
-        </ScrollView>
-      </View>
-    </GestureHandlerRootView>
+          </ScrollView>
+        </GestureHandlerRootView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
