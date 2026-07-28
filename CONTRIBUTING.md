@@ -58,13 +58,17 @@ We follow the [conventional commits specification](https://www.conventionalcommi
 
 ### Publishing to npm
 
-We use [release-it](https://github.com/release-it/release-it) to make it easier to publish new versions. It handles common tasks like bumping version based on semver, creating tags and releases etc.
+Releases use [changesets](https://github.com/changesets/changesets) and GitHub Actions with [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/)
 
-To publish new versions, run the following:
+1. On your PR, record the change:
 
 ```sh
-yarn release
+yarn changeset
 ```
+
+2. Merge to `main`. The **Build** workflow runs, then **Publish** opens a "Version Packages" PR (or publishes if that PR was already merged).
+
+3. Merge the Version Packages PR to publish to npm with provenance.
 
 ### Scripts
 
@@ -72,6 +76,7 @@ The `package.json` file contains various scripts for common tasks:
 
 - `yarn bootstrap`: setup project by installing all dependencies and pods.
 - `yarn typecheck`: type-check files with TypeScript.
+- `yarn changeset`: create a changeset for the next release.
 - `yarn example start`: start the Metro server for the example app.
 - `yarn example android`: run the example app on Android.
 - `yarn example ios`: run the example app on iOS.

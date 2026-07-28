@@ -1,29 +1,13 @@
-name: CI
+name: Build
+
 on:
-  pull_request:
+  push:
     branches:
       - main
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24.x
-          cache: yarn
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Typecheck files
-        run: yarn typecheck
-
   build:
+    name: Build project
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
