@@ -230,8 +230,6 @@ export type HanziWriterAnimationState =
   | 'stopped'
   | 'cancelled';
 
-// Module-level positioner removed — create a per-writer Positioner in `useHanziWriter`
-
 /** This component handles everything to do with the user's gestures on the writer element */
 export function UserStrokeGesture(props: PathProps) {
   const writer = useContext(HanziWriterContext)!;
@@ -399,10 +397,12 @@ function HanziWriterCharacter(props: {
 
 function HanziWriterOutline(props: { color?: string }) {
   const writer = useContext(HanziWriterContext);
-  // const isQuizActive = writer?.quiz.useStore((s) => s.active);
-  // const isAnimating = writer?.animator.useStore((s) => s.state === 'playing');
 
   const color = props.color || '#ededed';
+
+  if (!writer) {
+    return null;
+  }
 
   return (
     <G transform={getWriterTransform(writer)}>
