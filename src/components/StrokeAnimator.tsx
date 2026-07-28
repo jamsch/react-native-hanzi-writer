@@ -52,8 +52,17 @@ export const StrokeAnimator = forwardRef<
     }) => {
       const { duration, delay, onComplete } = params;
       const onCompleteCallback = () => onComplete?.();
-      const strokeIn = withTiming(1, { duration, easing: Easing.linear }, () =>
-        scheduleOnRN(onCompleteCallback)
+      const strokeIn = withTiming(
+        1,
+        { duration, easing: Easing.linear },
+        (finished) => {
+          // Reanimated also fires this with `finished: false` when the
+          // animation is cancelled (e.g. the stroke is re-animated or reset),
+          // which would otherwise report a completion that never happened.
+          if (finished) {
+            scheduleOnRN(onCompleteCallback);
+          }
+        }
       );
       progress.value = delay ? withDelay(delay, strokeIn) : strokeIn;
     },
