@@ -111,8 +111,8 @@ export default function App() {
               error={<Text>Error loading character</Text>}
               style={styles.writerContainer}
             >
-              {showGridLines && <HanziWriter.GridLines color="#000" />}
               <HanziWriter.Svg>
+                {showGridLines && <HanziWriter.GridLines color="#ddd" />}
                 {showOutline && <HanziWriter.Outline color="#ccc" />}
                 {showCharacter && (
                   <HanziWriter.Character color="#555" radicalColor="green" />

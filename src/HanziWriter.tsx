@@ -22,6 +22,7 @@ import RNSvg, {
   ClipPath,
   Path,
   G,
+  Line,
   PathProps,
   SvgProps,
 } from 'react-native-svg';
@@ -215,8 +216,8 @@ export function CharacterLoader({
 }
 
 // TRANSFORM is computed per-writer from the Positioner (maps internal char coords -> SVG coords)
-function getWriterTransform(writer: any) {
-  const p: Positioner = writer.positioner;
+function getWriterTransform(writer: ReturnType<typeof useHanziWriter>) {
+  const p = writer.positioner;
   // map: x_e = internal_x * scale + xOffset
   //      y_e = height - yOffset - internal_y * scale
   // which is equivalent to: translate(xOffset, height - yOffset) scale(scale, -scale)
@@ -267,15 +268,32 @@ export function UserStrokeGesture(props: PathProps) {
     [active, check]
   );
 
+  const tapGesture = useMemo(
+    () =>
+      Gesture.Tap()
+        .enabled(active)
+        .onBegin((event) => {
+          points.value = [{ x: event.x, y: event.y }];
+        }),
+    [active]
+  );
+
   const animatedPathProps = useAnimatedProps(() => ({
     d: getPathStringWorklet(points.value),
     opacity: fade.value,
   }));
 
   return (
-    <GestureDetector gesture={panGesture}>
-      <Animated.View style={StyleSheet.absoluteFill}>
-        <RNSvg width={writer.size} height={writer.size}>
+    <GestureDetector gesture={Gesture.Exclusive(panGesture, tapGesture)}>
+      <Animated.View
+        pointerEvents={active ? 'auto' : 'none'}
+        style={[StyleSheet.absoluteFill, styles.userStrokeLayer]}
+      >
+        <RNSvg
+          width={writer.size}
+          height={writer.size}
+          style={styles.transparentSvg}
+        >
           <G>
             <AnimatedPath
               animatedProps={animatedPathProps}
@@ -419,20 +437,27 @@ export function HanziWriterGridLines(props: {
   color?: string;
   width?: number;
 }) {
-  const { color = '#eee', width = 3 } = props;
+  const writer = useContext(HanziWriterContext)!;
+  const { color = '#DDD', width = 2 } = props;
+  const mid = writer.size / 2;
+
   return (
     <>
-      <View
-        style={[
-          styles.gridlineHorizontal,
-          { borderColor: color, borderBottomWidth: width },
-        ]}
+      <Line
+        x1={0}
+        y1={mid}
+        x2={writer.size}
+        y2={mid}
+        stroke={color}
+        strokeWidth={width}
       />
-      <View
-        style={[
-          styles.gridlineVertical,
-          { borderColor: color, borderLeftWidth: width },
-        ]}
+      <Line
+        x1={mid}
+        y1={0}
+        x2={mid}
+        y2={writer.size}
+        stroke={color}
+        strokeWidth={width}
       />
     </>
   );
@@ -444,17 +469,11 @@ const styles = StyleSheet.create({
     width: 300,
     maxHeight: 300,
   },
-  gridlineHorizontal: {
-    ...StyleSheet.absoluteFillObject,
-    bottom: '50%',
-    top: '50%',
+  userStrokeLayer: {
+    zIndex: 2,
   },
-  gridlineVertical: {
-    ...StyleSheet.absoluteFillObject,
-    bottom: 0,
-    left: '50%',
-    top: 0,
-    width: 1,
+  transparentSvg: {
+    backgroundColor: 'transparent',
   },
 });
 

@@ -54,9 +54,9 @@ function App() {
         }
         style={{ alignSelf: 'center' }}
       >
-        {/** Optional, grid lines to help draw the character */}
-        <HanziWriter.GridLines color="#ddd" />
         <HanziWriter.Svg>
+          {/** Optional, grid lines to help draw the character */}
+          <HanziWriter.GridLines color="#ddd" />
           {/** The outline is laid under the character */}
           <HanziWriter.Outline color="#ccc" />
           {/** The character is displayed on top. Animations run here. Quizzing will hide it */}
