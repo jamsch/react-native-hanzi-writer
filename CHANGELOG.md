@@ -5,5 +5,5 @@
 ### Major Changes
 
 - cdbb371: - Added Expo 57 support
-  - Breaking: `<HanziWriter.GridLines>` must now be placed inside `<HanziWriter.Svg>` instead of above it
-  - Added a `size` and `padding` attribute to `useHanziWriter()`
+- Breaking: `<HanziWriter.GridLines>` must now be placed inside `<HanziWriter.Svg>` instead of above it
+- Added a `size` and `padding` attribute to `useHanziWriter()`
