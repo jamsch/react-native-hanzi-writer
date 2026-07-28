@@ -221,7 +221,9 @@ function getWriterTransform(writer: ReturnType<typeof useHanziWriter>) {
   // map: x_e = internal_x * scale + xOffset
   //      y_e = height - yOffset - internal_y * scale
   // which is equivalent to: translate(xOffset, height - yOffset) scale(scale, -scale)
-  return `translate(${p.xOffset}, ${p.height - p.yOffset}) scale(${p.scale}, ${-p.scale})`;
+  return `translate(${p.xOffset}, ${p.height - p.yOffset}) scale(${
+    p.scale
+  }, ${-p.scale})`;
 }
 
 export type HanziWriterAnimationState =
@@ -241,10 +243,11 @@ export function UserStrokeGesture(props: PathProps) {
     const simplifiedPoints = simplify(points.value, 1);
     writer.quiz.check(simplifiedPoints);
     // Fade out the user's stroke
-    fade.value = withTiming(0, { duration: 200 }, () => {
-      // reset the values
-      points.value = [];
-      fade.value = 1;
+    fade.value = withTiming(0, { duration: 200 }, (finished) => {
+      // only reset the points if the animation finished
+      if (finished) {
+        points.value = [];
+      }
     });
   }, [writer.quiz.check]);
 
@@ -253,6 +256,7 @@ export function UserStrokeGesture(props: PathProps) {
       Gesture.Pan()
         .enabled(active)
         .onStart((event) => {
+          fade.value = 1;
           points.value = [{ x: event.x, y: event.y }];
         })
         .onUpdate((event) => {
@@ -271,6 +275,7 @@ export function UserStrokeGesture(props: PathProps) {
       Gesture.Tap()
         .enabled(active)
         .onBegin((event) => {
+          fade.value = 1;
           points.value = [{ x: event.x, y: event.y }];
         }),
     [active]
