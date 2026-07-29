@@ -1,6 +1,6 @@
 {
   "name": "@jamsch/react-native-hanzi-writer",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Hanzi/Kanji writer and stroke order quizzer library for React Native",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
