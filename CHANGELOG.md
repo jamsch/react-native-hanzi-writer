@@ -1,5 +1,11 @@
 # @jamsch/react-native-hanzi-writer
 
+## 2.0.2
+
+### Patch Changes
+
+- 1731175: Fix: User strokes now record from the initial touch-down instead of after the pan starts, so drawn lines are no longer shortened at the start.
+
 ## 2.0.1
 
 ### Patch Changes
