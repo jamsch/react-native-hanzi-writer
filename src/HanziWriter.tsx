@@ -255,7 +255,8 @@ export function UserStrokeGesture(props: PathProps) {
     () =>
       Gesture.Pan()
         .enabled(active)
-        .onStart((event) => {
+        .minDistance(0)
+        .onBegin((event) => {
           fade.value = 1;
           points.value = [{ x: event.x, y: event.y }];
         })
@@ -266,19 +267,14 @@ export function UserStrokeGesture(props: PathProps) {
           if (points.value.length > 0) {
             scheduleOnRN(check);
           }
+        })
+        .onFinalize((_event, success) => {
+          // Pan never activated (e.g. tap without drag) — clear the preview point
+          if (!success) {
+            points.value = [];
+          }
         }),
     [active, check]
-  );
-
-  const tapGesture = useMemo(
-    () =>
-      Gesture.Tap()
-        .enabled(active)
-        .onBegin((event) => {
-          fade.value = 1;
-          points.value = [{ x: event.x, y: event.y }];
-        }),
-    [active]
   );
 
   const animatedPathProps = useAnimatedProps(() => ({
@@ -287,7 +283,7 @@ export function UserStrokeGesture(props: PathProps) {
   }));
 
   return (
-    <GestureDetector gesture={Gesture.Exclusive(panGesture, tapGesture)}>
+    <GestureDetector gesture={panGesture}>
       <Animated.View
         pointerEvents={active ? 'auto' : 'none'}
         style={[StyleSheet.absoluteFill, styles.userStrokeLayer]}
